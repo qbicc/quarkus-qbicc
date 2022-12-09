@@ -1,0 +1,12 @@
+name: Qbicc extension for Quarkus
+#description: Enable native image compilation using Qbicc.
+metadata:
+  keywords:
+    - qbicc
+    - native
+#  guide: ...
+  categories:
+    - "miscellaneous"
+  status: "experimental"
+  config:
+    - "quarkus.qbicc."
