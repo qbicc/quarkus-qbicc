@@ -75,6 +75,7 @@ class QbiccProcessor {
             .setPie(pie)
             .setReferenceStrategy(ReferenceStrategy.POINTER_AS1)
             .setEmitAssembly(configuration.emitAsm())
+            .addLlcOptions(configuration.llvmConfiguration().llcOptions().orElse(List.of()))
         );
         mainBuilder.setBackend(Backend.llvm);
         mainBuilder.setGc(configuration.gc().toString());
