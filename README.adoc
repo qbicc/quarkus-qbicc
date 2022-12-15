@@ -1,0 +1,14 @@
+= Qbicc plugin for Quarkus
+
+This is the https://qbicc.org[qbicc] plugin for https://quarkus.io[Quarkus].
+
+To create a native executable of your Quarkus project using qbicc, add the following dependency to your Quarkus Maven build:
+
+[source,xml]
+----
+    <dependency>
+        <groupId>org.qbicc.quarkus</groupId>
+        <artifactId>quarkus-qbicc</artifactId>
+        <version>0.1.0</version>
+    </dependency>
+----
