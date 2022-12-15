@@ -4,7 +4,10 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
+import io.quarkus.bootstrap.resolver.maven.BootstrapMavenException;
+import io.quarkus.bootstrap.resolver.maven.MavenArtifactResolver;
 import io.quarkus.deployment.annotations.BuildStep;
 import io.quarkus.deployment.builditem.FeatureBuildItem;
 import io.quarkus.deployment.builditem.MainClassBuildItem;
@@ -16,12 +19,15 @@ import io.quarkus.deployment.pkg.builditem.ArtifactResultBuildItem;
 import io.quarkus.deployment.pkg.builditem.NativeImageSourceJarBuildItem;
 import io.quarkus.deployment.pkg.builditem.OutputTargetBuildItem;
 import org.apache.commons.lang3.SystemUtils;
-import org.qbicc.context.Diagnostic;
+import org.apache.maven.settings.Settings;
+import org.eclipse.aether.RepositorySystemSession;
 import org.qbicc.context.DiagnosticContext;
+import org.qbicc.driver.ClassPathItem;
 import org.qbicc.machine.arch.Platform;
 import org.qbicc.main.Backend;
 import org.qbicc.main.ClassPathEntry;
 import org.qbicc.main.Main;
+import org.qbicc.main.QbiccMavenResolver;
 import org.qbicc.plugin.llvm.LLVMConfiguration;
 import org.qbicc.plugin.llvm.ReferenceStrategy;
 import org.qbicc.quarkus.config.QbiccConfiguration;
@@ -47,6 +53,19 @@ class QbiccProcessor {
         );
     }
 
+    private void resolveClassPath(DiagnosticContext ctxt, Consumer<ClassPathItem> classPathItemConsumer, final List<ClassPathEntry> paths, Runtime.Version version) {
+        try {
+            MavenArtifactResolver mar = MavenArtifactResolver.builder().build();
+            QbiccMavenResolver resolver = new QbiccMavenResolver(mar.getSystem());
+            Settings settings = mar.getMavenContext().getEffectiveSettings();
+            RepositorySystemSession session = mar.getSession();
+            List<ClassPathItem> result = resolver.requestArtifacts(session, settings, paths, ctxt, version);
+            result.forEach(classPathItemConsumer);
+        } catch (BootstrapMavenException | IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     @BuildStep
     QbiccResultBuildItem build(
         QbiccConfiguration configuration,
@@ -68,13 +87,17 @@ class QbiccProcessor {
         if (configuration.classLibVersion().isPresent()) {
             mainBuilder.setClassLibVersion(configuration.classLibVersion().get());
         }
-        mainBuilder.setPlatform(configuration.platform().orElse(Platform.HOST_PLATFORM));
+        final Platform platform = configuration.platform().orElse(Platform.HOST_PLATFORM);
+        mainBuilder.setPlatform(platform);
         mainBuilder.setIsPie(pie);
         mainBuilder.setLlvmConfigurationBuilder(LLVMConfiguration.builder()
             .setEmitIr(configuration.llvmConfiguration().emitIr())
             .setPie(pie)
             .setReferenceStrategy(ReferenceStrategy.POINTER_AS1)
             .setEmitAssembly(configuration.emitAsm())
+            .setPlatform(platform)
+            .setCompileOutput(true)
+            .setOpaquePointers(configuration.llvmConfiguration().opaquePointers())
             .addLlcOptions(configuration.llvmConfiguration().llcOptions().orElse(List.of()))
         );
         mainBuilder.setBackend(Backend.llvm);
@@ -82,6 +105,7 @@ class QbiccProcessor {
         mainBuilder.setMainClass(mainClassBuildItem.getClassName());
         mainBuilder.setOutputPath(outputDirectory);
         mainBuilder.setOutputName(nativeImageName);
+        mainBuilder.setClassPathResolver(this::resolveClassPath);
         mainBuilder.setDiagnosticsHandler(diagnostics -> diagnostics.forEach(diagnostic -> {
             try {
                 // todo: tie into maven output somehow
