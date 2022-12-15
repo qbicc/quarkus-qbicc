@@ -1,10 +1,18 @@
 package org.qbicc.quarkus.deployment;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.function.Consumer;
+import java.util.jar.Attributes;
+import java.util.jar.JarFile;
 
+import io.quarkus.bootstrap.resolver.maven.BootstrapMavenException;
+import io.quarkus.bootstrap.resolver.maven.MavenArtifactResolver;
 import io.quarkus.deployment.annotations.BuildStep;
 import io.quarkus.deployment.builditem.FeatureBuildItem;
 import io.quarkus.deployment.builditem.MainClassBuildItem;
@@ -16,12 +24,15 @@ import io.quarkus.deployment.pkg.builditem.ArtifactResultBuildItem;
 import io.quarkus.deployment.pkg.builditem.NativeImageSourceJarBuildItem;
 import io.quarkus.deployment.pkg.builditem.OutputTargetBuildItem;
 import org.apache.commons.lang3.SystemUtils;
-import org.qbicc.context.Diagnostic;
+import org.apache.maven.settings.Settings;
+import org.eclipse.aether.RepositorySystemSession;
 import org.qbicc.context.DiagnosticContext;
+import org.qbicc.driver.ClassPathItem;
 import org.qbicc.machine.arch.Platform;
 import org.qbicc.main.Backend;
 import org.qbicc.main.ClassPathEntry;
 import org.qbicc.main.Main;
+import org.qbicc.main.QbiccMavenResolver;
 import org.qbicc.plugin.llvm.LLVMConfiguration;
 import org.qbicc.plugin.llvm.ReferenceStrategy;
 import org.qbicc.quarkus.config.QbiccConfiguration;
@@ -47,6 +58,19 @@ class QbiccProcessor {
         );
     }
 
+    private void resolveClassPath(DiagnosticContext ctxt, Consumer<ClassPathItem> classPathItemConsumer, final List<ClassPathEntry> paths, Runtime.Version version) {
+        try {
+            MavenArtifactResolver mar = MavenArtifactResolver.builder().build();
+            QbiccMavenResolver resolver = new QbiccMavenResolver(mar.getSystem());
+            Settings settings = mar.getMavenContext().getEffectiveSettings();
+            RepositorySystemSession session = mar.getSession();
+            List<ClassPathItem> result = resolver.requestArtifacts(session, settings, paths, ctxt, version);
+            result.forEach(classPathItemConsumer);
+        } catch (BootstrapMavenException | IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     @BuildStep
     QbiccResultBuildItem build(
         QbiccConfiguration configuration,
@@ -58,7 +82,7 @@ class QbiccProcessor {
         OutputTargetBuildItem outputTargetBuildItem,
         PackageConfig packageConfig
     ) {
-        final Path outputDirectory = outputTargetBuildItem.getOutputDirectory();
+        final Path outputDirectory = outputTargetBuildItem.getOutputDirectory().resolve("native-" + outputTargetBuildItem.getBaseName());
         final String nativeImageName = outputTargetBuildItem.getBaseName() + packageConfig.getRunnerSuffix();
         boolean isContainerBuild = false; // this is something we have with graalvm
         boolean defaultPie = ! SystemUtils.IS_OS_WINDOWS && ! isContainerBuild;
@@ -68,13 +92,17 @@ class QbiccProcessor {
         if (configuration.classLibVersion().isPresent()) {
             mainBuilder.setClassLibVersion(configuration.classLibVersion().get());
         }
-        mainBuilder.setPlatform(configuration.platform().orElse(Platform.HOST_PLATFORM));
+        final Platform platform = configuration.platform().orElse(Platform.HOST_PLATFORM);
+        mainBuilder.setPlatform(platform);
         mainBuilder.setIsPie(pie);
         mainBuilder.setLlvmConfigurationBuilder(LLVMConfiguration.builder()
             .setEmitIr(configuration.llvmConfiguration().emitIr())
             .setPie(pie)
             .setReferenceStrategy(ReferenceStrategy.POINTER_AS1)
             .setEmitAssembly(configuration.emitAsm())
+            .setPlatform(platform)
+            .setCompileOutput(true)
+            .setOpaquePointers(configuration.llvmConfiguration().opaquePointers())
             .addLlcOptions(configuration.llvmConfiguration().llcOptions().orElse(List.of()))
         );
         mainBuilder.setBackend(Backend.llvm);
@@ -82,6 +110,7 @@ class QbiccProcessor {
         mainBuilder.setMainClass(mainClassBuildItem.getClassName());
         mainBuilder.setOutputPath(outputDirectory);
         mainBuilder.setOutputName(nativeImageName);
+        mainBuilder.setClassPathResolver(this::resolveClassPath);
         mainBuilder.setDiagnosticsHandler(diagnostics -> diagnostics.forEach(diagnostic -> {
             try {
                 // todo: tie into maven output somehow
@@ -92,7 +121,7 @@ class QbiccProcessor {
         }));
         // for now...
         mainBuilder.addGraalFeatures(graalvmFeatures.stream().map(NativeImageFeatureBuildItem::getQualifiedName).toList());
-        mainBuilder.addAppPath(ClassPathEntry.of(nativeImageJar.getPath()));
+        addAppPath(mainBuilder, nativeImageJar.getPath(), new HashSet<>());
         final Main main = mainBuilder.build();
         DiagnosticContext context = main.call();
         int errors = context.errors();
@@ -112,5 +141,28 @@ class QbiccProcessor {
             throw new RuntimeException("Native image build failed due to errors");
         }
         return new QbiccResultBuildItem(outputDirectory.resolve(nativeImageName), "<todo>");
+    }
+
+    private void addAppPath(final Main.Builder mainBuilder, final Path path, final Set<Path> visited) {
+        if (! visited.add(path)) {
+            return;
+        }
+        if (Files.isDirectory(path)) {
+            mainBuilder.addAppPath(ClassPathEntry.of(path));
+        } else {
+            // assume it's a JAR
+            try (JarFile jar = new JarFile(path.toFile())) {
+                final String classPathAttribute = jar.getManifest().getMainAttributes().getValue(Attributes.Name.CLASS_PATH);
+                if (classPathAttribute != null) {
+                    final String[] items = classPathAttribute.split(" ");
+                    for (String item : items) {
+                        addAppPath(mainBuilder, path.getParent().resolve(item), visited);
+                    }
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            mainBuilder.addAppPath(ClassPathEntry.of(path));
+        }
     }
 }

@@ -15,6 +15,12 @@
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-core-deployment</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-bootstrap-maven-resolver</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.qbicc.quarkus</groupId>
@@ -27,9 +33,172 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.apache.maven.resolver</groupId>
+            <artifactId>maven-resolver-api</artifactId>
+            <version>1.8.1</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
             <groupId>org.qbicc</groupId>
             <artifactId>qbicc-main</artifactId>
             <version>${qbicc.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-codec</groupId>
+                    <artifactId>commons-codec</artifactId>
+                </exclusion>
+
+                <exclusion>
+                    <groupId>commons-io</groupId>
+                    <artifactId>commons-io</artifactId>
+                </exclusion>
+
+                <exclusion>
+                    <groupId>javax.inject</groupId>
+                    <artifactId>javax.inject</artifactId>
+                </exclusion>
+
+                <exclusion>
+                    <groupId>org.apache.commons</groupId>
+                    <artifactId>commons-lang3</artifactId>
+                </exclusion>
+
+                <exclusion>
+                    <groupId>org.apache.httpcomponents</groupId>
+                    <artifactId>httpclient</artifactId>
+                </exclusion>
+
+                <exclusion>
+                    <groupId>org.apache.httpcomponents</groupId>
+                    <artifactId>httpcore</artifactId>
+                </exclusion>
+
+                <exclusion>
+                    <groupId>org.apache.maven</groupId>
+                    <artifactId>maven-artifact</artifactId>
+                </exclusion>
+
+                <exclusion>
+                    <groupId>org.apache.maven</groupId>
+                    <artifactId>maven-builder-support</artifactId>
+                </exclusion>
+
+                <exclusion>
+                    <groupId>org.apache.maven</groupId>
+                    <artifactId>maven-model</artifactId>
+                </exclusion>
+
+                <exclusion>
+                    <groupId>org.apache.maven</groupId>
+                    <artifactId>maven-model-builder</artifactId>
+                </exclusion>
+
+                <exclusion>
+                    <groupId>org.apache.maven</groupId>
+                    <artifactId>maven-repository-metadata</artifactId>
+                </exclusion>
+
+                <exclusion>
+                    <groupId>org.apache.maven</groupId>
+                    <artifactId>maven-resolver-provider</artifactId>
+                </exclusion>
+
+                <exclusion>
+                    <groupId>org.apache.maven</groupId>
+                    <artifactId>maven-settings</artifactId>
+                </exclusion>
+
+                <exclusion>
+                    <groupId>org.apache.maven</groupId>
+                    <artifactId>maven-settings-builder</artifactId>
+                </exclusion>
+
+                <exclusion>
+                    <groupId>org.apache.maven.resolver</groupId>
+                    <artifactId>maven-resolver-api</artifactId>
+                </exclusion>
+
+                <exclusion>
+                    <groupId>org.apache.maven.resolver</groupId>
+                    <artifactId>maven-resolver-impl</artifactId>
+                </exclusion>
+
+                <exclusion>
+                    <groupId>org.apache.maven.resolver</groupId>
+                    <artifactId>maven-resolver-spi</artifactId>
+                </exclusion>
+
+                <exclusion>
+                    <groupId>org.apache.maven.resolver</groupId>
+                    <artifactId>maven-resolver-util</artifactId>
+                </exclusion>
+
+                <exclusion>
+                    <groupId>org.apache.maven.resolver</groupId>
+                    <artifactId>maven-resolver-connector-basic</artifactId>
+                </exclusion>
+
+                <exclusion>
+                    <groupId>org.apache.maven.resolver</groupId>
+                    <artifactId>maven-resolver-transport-wagon</artifactId>
+                </exclusion>
+
+                <exclusion>
+                    <groupId>org.apache.maven.wagon</groupId>
+                    <artifactId>wagon-provider-api</artifactId>
+                </exclusion>
+
+                <exclusion>
+                    <groupId>org.apache.maven.wagon</groupId>
+                    <artifactId>wagon-file</artifactId>
+                </exclusion>
+
+                <exclusion>
+                    <groupId>org.apache.maven.wagon</groupId>
+                    <artifactId>wagon-http-lightweight</artifactId>
+                </exclusion>
+
+                <exclusion>
+                    <groupId>org.apache.maven.wagon</groupId>
+                    <artifactId>wagon-http-shared</artifactId>
+                </exclusion>
+
+                <exclusion>
+                    <groupId>org.codehaus.plexus</groupId>
+                    <artifactId>plexus-interpolation</artifactId>
+                </exclusion>
+
+                <exclusion>
+                    <groupId>org.codehaus.plexus</groupId>
+                    <artifactId>plexus-utils</artifactId>
+                </exclusion>
+
+                <exclusion>
+                    <groupId>org.eclipse.sisu</groupId>
+                    <artifactId>org.eclipse.sisu.inject</artifactId>
+                </exclusion>
+
+                <exclusion>
+                    <groupId>org.jsoup</groupId>
+                    <artifactId>jsoup</artifactId>
+                </exclusion>
+
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                </exclusion>
+
+                <exclusion>
+                    <groupId>org.sonatype.plexus</groupId>
+                    <artifactId>plexus-cipher</artifactId>
+                </exclusion>
+
+                <exclusion>
+                    <groupId>org.sonatype.plexus</groupId>
+                    <artifactId>plexus-sec-dispatcher</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>
