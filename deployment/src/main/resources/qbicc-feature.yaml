@@ -1,0 +1,89 @@
+# A qbicc feature that is meant to be applicable to any Quarkus application.
+# As things get more mature, we should aim to make this less adhoc!
+---
+initializeAtRuntime:
+  - io.quarkus.dev.console.QuarkusConsole
+  - io.netty.resolver.dns.DnsNameResolver
+  - io.netty.resolver.dns.DefaultDnsServerAddressStreamProvider
+  - io.netty.util.NetUtil
+  - io.netty.util.internal.PlatformDependent
+  # Ripple from PlatformDependent
+  - io.netty.buffer.PoolArena
+  - io.netty.buffer.UnpooledByteBufAllocator
+  - io.netty.buffer.UnsafeByteBufUtil
+  - io.netty.channel.nio.NioEventLoop
+  - io.netty.channel.socket.nio.NioServerSocketChannel
+  - io.netty.channel.socket.nio.NioSocketChannel
+  - io.netty.internal.PlatformDependent$Mpsc
+  - io.netty.handler.codec.http.HttpHeaderNames
+  - io.netty.handler.codec.http.HttpMethod
+  - io.netty.handler.ssl.JettyAlpnSslEngine
+  - io.netty.resolver.dns.DnsServerAddressStreamProviders
+  - io.netty.resolver.HostsFileEntriesResolver
+  - io.netty.util.AsciiString
+  - io.netty.util.internal.CleanerJava9
+  - io.quarkus.vertx.http.runtime.VertxHttpRecorder
+  - io.vertx.core.http.HttpMethod
+  # JBoss
+  - org.jboss.logmanager.StandardOutputStreams
+  - org.jboss.logmanager.handlers.ConsoleHandler
+  - org.jboss.logmanager.handlers.SyslogHandler
+  - org.wildfly.common.net.HostName
+  - org.wildfly.common.os.Process
+  - java.net.AbstractPlainDatagramSocketImpl
+  - sun.nio.ch.DatagramChannelImpl$DefaultOptionsHolder
+  - sun.nio.ch.NativeSocketAddress
+  - sun.nio.ch.ServerSocketChannelImpl$DefaultOptionsHolder
+  - sun.nio.ch.SocketChannelImpl$DefaultOptionsHolder
+  # Hack for Quarkus 2.12: https://github.com/netty/netty/issues/11638
+  - io.netty.handler.ssl.BouncyCastleAlpnSslUtils
+runtimeResources:
+  - application.properties
+  - META-INF/microprofile-config.properties
+  - application-prod.properties
+runtimeResource:
+  - quarkus-build-time-runtime.properties
+  - quarkus-runtime-config-defaults.properties
+reflectiveConstructors:
+  - declaringClass: java/io/File
+    descriptor: (Ljava/lang/String;)V
+reflectiveFields:
+  - declaringClass: java/nio/Buffer
+    name: address
+reflectiveMethods:
+  - declaringClass: io/netty/channel/DefaultChannelPipeline$HeadContext
+    name: channelRegistered
+    descriptor: "(Lio/netty/channel/ChannelHandlerContext;)V"
+  - declaringClass: io/netty/channel/DefaultChannelPipeline$TailContext
+    name: channelRegistered
+    descriptor: "(Lio/netty/channel/ChannelHandlerContext;)V"
+  - declaringClass: io/quarkus/runtime/logging/InheritableLevel
+    name: of
+    descriptor: (Ljava/lang/String;)Lio/quarkus/runtime/logging/InheritableLevel;
+  - declaringClass: java/lang/management/ManagementFactory
+    name: getRuntimeMXBean
+    descriptor: "()Ljava/lang/management/RuntimeMXBean;"
+  - declaringClass: java/lang/management/RuntimeMXBean
+    name: getInputArguments
+    descriptor: "()Ljava/util/List;"
+  - declaringClass: java/lang/ProcessHandle
+    name: current
+    descriptor: "()Ljava/lang/ProcessHandle;"
+  - declaringClass: java/lang/ProcessHandle
+    name: pid
+    descriptor: "()J"
+  - declaringClass: java/net/ssl/SSLEngine
+    name: getApplicationProtocol
+    descriptor: "()Ljava/lang/String;"
+  - declaringClass: sun/misc/VM
+    name: maxDirectMemory
+    descriptor: "()J"
+  - declaringClass: sun/misc/Unsafe
+    name: copyMemory
+    descriptor: "(Ljava/lang/Object;JLjava/lang/Object;JJ)V"
+  - declaringClass: sun/misc/Unsafe
+    name: storeFence
+    descriptor: "()V"
+  - declaringClass: sun/misc/Unsafe
+    name: invokeCleaner
+    descriptor: "(Ljava/nio/ByteBuffer;)V"
