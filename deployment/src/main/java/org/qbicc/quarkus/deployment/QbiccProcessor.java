@@ -1,10 +1,15 @@
 package org.qbicc.quarkus.deployment;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
+import java.util.jar.Attributes;
+import java.util.jar.JarFile;
 
 import io.quarkus.bootstrap.resolver.maven.BootstrapMavenException;
 import io.quarkus.bootstrap.resolver.maven.MavenArtifactResolver;
@@ -77,7 +82,7 @@ class QbiccProcessor {
         OutputTargetBuildItem outputTargetBuildItem,
         PackageConfig packageConfig
     ) {
-        final Path outputDirectory = outputTargetBuildItem.getOutputDirectory();
+        final Path outputDirectory = outputTargetBuildItem.getOutputDirectory().resolve("native-" + outputTargetBuildItem.getBaseName());
         final String nativeImageName = outputTargetBuildItem.getBaseName() + packageConfig.getRunnerSuffix();
         boolean isContainerBuild = false; // this is something we have with graalvm
         boolean defaultPie = ! SystemUtils.IS_OS_WINDOWS && ! isContainerBuild;
@@ -116,7 +121,7 @@ class QbiccProcessor {
         }));
         // for now...
         mainBuilder.addGraalFeatures(graalvmFeatures.stream().map(NativeImageFeatureBuildItem::getQualifiedName).toList());
-        mainBuilder.addAppPath(ClassPathEntry.of(nativeImageJar.getPath()));
+        addAppPath(mainBuilder, nativeImageJar.getPath(), new HashSet<>());
         final Main main = mainBuilder.build();
         DiagnosticContext context = main.call();
         int errors = context.errors();
@@ -136,5 +141,28 @@ class QbiccProcessor {
             throw new RuntimeException("Native image build failed due to errors");
         }
         return new QbiccResultBuildItem(outputDirectory.resolve(nativeImageName), "<todo>");
+    }
+
+    private void addAppPath(final Main.Builder mainBuilder, final Path path, final Set<Path> visited) {
+        if (! visited.add(path)) {
+            return;
+        }
+        if (Files.isDirectory(path)) {
+            mainBuilder.addAppPath(ClassPathEntry.of(path));
+        } else {
+            // assume it's a JAR
+            try (JarFile jar = new JarFile(path.toFile())) {
+                final String classPathAttribute = jar.getManifest().getMainAttributes().getValue(Attributes.Name.CLASS_PATH);
+                if (classPathAttribute != null) {
+                    final String[] items = classPathAttribute.split(" ");
+                    for (String item : items) {
+                        addAppPath(mainBuilder, path.getParent().resolve(item), visited);
+                    }
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            mainBuilder.addAppPath(ClassPathEntry.of(path));
+        }
     }
 }
