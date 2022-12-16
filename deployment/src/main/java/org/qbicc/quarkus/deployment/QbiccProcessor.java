@@ -1,6 +1,7 @@
 package org.qbicc.quarkus.deployment;
 
 import java.io.IOException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashSet;
@@ -23,6 +24,7 @@ import io.quarkus.deployment.pkg.PackageConfig;
 import io.quarkus.deployment.pkg.builditem.ArtifactResultBuildItem;
 import io.quarkus.deployment.pkg.builditem.NativeImageSourceJarBuildItem;
 import io.quarkus.deployment.pkg.builditem.OutputTargetBuildItem;
+import io.quarkus.runtime.util.ClassPathUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.maven.settings.Settings;
 import org.eclipse.aether.RepositorySystemSession;
@@ -93,6 +95,8 @@ class QbiccProcessor {
             mainBuilder.setClassLibVersion(configuration.classLibVersion().get());
         }
         final Platform platform = configuration.platform().orElse(Platform.HOST_PLATFORM);
+        URL defaultFeature = QbiccProcessor.class.getResource("/qbicc-feature.yaml");
+        mainBuilder.addQbiccFeatures(List.of(defaultFeature));
         mainBuilder.setPlatform(platform);
         mainBuilder.setIsPie(pie);
         mainBuilder.setLlvmConfigurationBuilder(LLVMConfiguration.builder()
