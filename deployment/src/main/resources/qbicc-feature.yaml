@@ -45,45 +45,45 @@ runtimeResource:
   - quarkus-build-time-runtime.properties
   - quarkus-runtime-config-defaults.properties
 reflectiveConstructors:
-  - declaringClass: java/io/File
+  - declaringClass: java.io.File
     descriptor: (Ljava/lang/String;)V
 reflectiveFields:
-  - declaringClass: java/nio/Buffer
+  - declaringClass: java.nio.Buffer
     name: address
 reflectiveMethods:
-  - declaringClass: io/netty/channel/DefaultChannelPipeline$HeadContext
+  - declaringClass: io.netty.channel.DefaultChannelPipeline$HeadContext
     name: channelRegistered
     descriptor: "(Lio/netty/channel/ChannelHandlerContext;)V"
-  - declaringClass: io/netty/channel/DefaultChannelPipeline$TailContext
+  - declaringClass: io.netty.channel.DefaultChannelPipeline$TailContext
     name: channelRegistered
     descriptor: "(Lio/netty/channel/ChannelHandlerContext;)V"
-  - declaringClass: io/quarkus/runtime/logging/InheritableLevel
+  - declaringClass: io.quarkus.runtime.logging.InheritableLevel
     name: of
     descriptor: (Ljava/lang/String;)Lio/quarkus/runtime/logging/InheritableLevel;
-  - declaringClass: java/lang/management/ManagementFactory
+  - declaringClass: java.lang.management.ManagementFactory
     name: getRuntimeMXBean
     descriptor: "()Ljava/lang/management/RuntimeMXBean;"
-  - declaringClass: java/lang/management/RuntimeMXBean
+  - declaringClass: java.lang.management.RuntimeMXBean
     name: getInputArguments
     descriptor: "()Ljava/util/List;"
-  - declaringClass: java/lang/ProcessHandle
+  - declaringClass: java.lang.ProcessHandle
     name: current
     descriptor: "()Ljava/lang/ProcessHandle;"
-  - declaringClass: java/lang/ProcessHandle
+  - declaringClass: java.lang.ProcessHandle
     name: pid
     descriptor: "()J"
-  - declaringClass: java/net/ssl/SSLEngine
+  - declaringClass: java.net.ssl.SSLEngine
     name: getApplicationProtocol
     descriptor: "()Ljava/lang/String;"
-  - declaringClass: sun/misc/VM
+  - declaringClass: sun.misc.VM
     name: maxDirectMemory
     descriptor: "()J"
-  - declaringClass: sun/misc/Unsafe
+  - declaringClass: sun.misc.Unsafe
     name: copyMemory
     descriptor: "(Ljava/lang/Object;JLjava/lang/Object;JJ)V"
-  - declaringClass: sun/misc/Unsafe
+  - declaringClass: sun.misc.Unsafe
     name: storeFence
     descriptor: "()V"
-  - declaringClass: sun/misc/Unsafe
+  - declaringClass: sun.misc.Unsafe
     name: invokeCleaner
     descriptor: "(Ljava/nio/ByteBuffer;)V"
