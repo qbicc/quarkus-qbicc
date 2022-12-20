@@ -111,14 +111,18 @@ class QbiccProcessor {
                          List<UnsafeAccessedFieldBuildItem> unsafeAccessedFields,
                          List<JniRuntimeAccessBuildItem> jniRuntimeAccessibleClasses,
                          List<LambdaCapturingTypeBuildItem> lambdaCapturingTypeBuildItems) {
+
         QbiccFeature qf = new QbiccFeature();
 
-        if (runtimeInitializedClassBuildItems.size() > 0) {
-            ArrayList<String> runtimeInitialized = new ArrayList<>();
-            for (RuntimeInitializedClassBuildItem i : runtimeInitializedClassBuildItems) {
-                runtimeInitialized.add(i.getClassName());
-            }
-            qf.initializeAtRuntime = runtimeInitialized.toArray(String[]::new);
+        // These fields of the qbicc feature are computed from from multiple input BuildItems
+        ArrayList<String> qfInitializeAtRuntime = new ArrayList<>();
+        ArrayList<QbiccFeature.ReflectiveClass> qfReflectiveClasses = new ArrayList<>();
+        ArrayList<String> qfRuntimeResources = new ArrayList<>();
+
+        // Now, go through each input BuildItem and translate the information to the QbiccFeature
+
+        for (RuntimeInitializedClassBuildItem i : runtimeInitializedClassBuildItems) {
+            qfInitializeAtRuntime.add(i.getClassName());
         }
 
         if (runtimeInitializedPackageBuildItems.size() > 0) {
@@ -133,8 +137,10 @@ class QbiccProcessor {
             System.out.printf("TODO: QbiccProcessor: ignored %d proxies\n", proxies.size());
         }
 
-        if (resourcePatterns.size() > 0) {
-            System.out.printf("TODO: QbiccProcessor: ignored %d resource patterns\n", resourcePatterns.size());
+        for (NativeImageResourcePatternsBuildItem rp : resourcePatterns) {
+            for (String includes : rp.getIncludePatterns()) {
+                qfRuntimeResources.add(includes);
+            }
         }
 
         if (resourceBundles.size() > 0) {
@@ -146,21 +152,24 @@ class QbiccProcessor {
         }
 
         if (reflectiveFields.size() > 0) {
-            System.out.printf("TODO: QbiccProcessor: ignored %d reflective fields\n", reflectiveFields.size());
-        }
-
-        if (reflectiveClassBuildItems.size() > 0) {
-            ArrayList<QbiccFeature.ReflectiveClass> refClasses = new ArrayList<>();
-            for (ReflectiveClassBuildItem i : reflectiveClassBuildItems) {
-                for (String name : i.getClassNames()) {
-                    refClasses.add(new QbiccFeature.ReflectiveClass(name, i.isFields(), i.isConstructors(), i.isMethods()));
-                }
+            ArrayList<QbiccFeature.Field> refFields = new ArrayList<>();
+            for (ReflectiveFieldBuildItem rf : reflectiveFields) {
+                refFields.add(new QbiccFeature.Field(rf.getDeclaringClass(), rf.getName()));
             }
-            qf.reflectiveClasses = refClasses.toArray(QbiccFeature.ReflectiveClass[]::new);
+            qf.reflectiveFields = refFields.toArray(QbiccFeature.Field[]::new);
         }
 
-        if (serviceProviderBuildItems.size() > 0) {
-            System.out.printf("TODO: QbiccProcessor: ignored %d service providers\n", serviceProviderBuildItems.size());
+        for (ReflectiveClassBuildItem i : reflectiveClassBuildItems) {
+            for (String name : i.getClassNames()) {
+                qfReflectiveClasses.add(new QbiccFeature.ReflectiveClass(name, i.isFields(), i.isConstructors(), i.isMethods()));
+            }
+        }
+
+        for (ServiceProviderBuildItem sp: serviceProviderBuildItems) {
+            qfRuntimeResources.add(sp.serviceDescriptorFile());
+            for (String pc: sp.providers()) {
+                qfReflectiveClasses.add(new QbiccFeature.ReflectiveClass(pc, false, true, false));
+            }
         }
 
         if (unsafeAccessedFields.size() > 0) {
@@ -176,6 +185,11 @@ class QbiccProcessor {
             // TODO: Related to GraalVM serialization of initial heap, so not relevant for qbicc??  Don't consume this build item?
             System.out.printf("TODO: QbiccProcessor: ignored %d lambda capturing types\n", lambdaCapturingTypeBuildItems.size());
         }
+
+        // Finalize the fields that were produced by multiple items.
+        qf.initializeAtRuntime = qfInitializeAtRuntime.toArray(String[]::new);
+        qf.reflectiveClasses = qfReflectiveClasses.toArray(QbiccFeature.ReflectiveClass[]::new);
+        qf.runtimeResources = qfRuntimeResources.toArray(String[]::new);
 
         return new QbiccFeatureBuildItem(qf);
     }
