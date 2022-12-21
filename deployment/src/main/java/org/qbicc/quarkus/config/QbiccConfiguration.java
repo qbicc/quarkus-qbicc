@@ -12,7 +12,7 @@ import org.qbicc.machine.arch.Platform;
 /**
  * The configuration of the extension.
  */
-@ConfigMapping
+@ConfigMapping(prefix = "quarkus.qbicc")
 @ConfigRoot(phase = ConfigPhase.BUILD_TIME)
 public interface QbiccConfiguration {
     /**
