@@ -148,7 +148,11 @@ class QbiccProcessor {
         }
 
         if (reflectiveMethods.size() > 0) {
-            System.out.printf("TODO: QbiccProcessor: ignored %d reflective methods\n", reflectiveMethods.size());
+            ArrayList<QbiccFeature.Method> refMethods = new ArrayList<>();
+            for (ReflectiveMethodBuildItem rm: reflectiveMethods) {
+                refMethods.add(new QbiccFeature.Method(rm.getDeclaringClass(), rm.getName(), rm.getParams()));
+            }
+            qf.reflectiveMethods = refMethods.toArray(QbiccFeature.Method[]::new);
         }
 
         if (reflectiveFields.size() > 0) {

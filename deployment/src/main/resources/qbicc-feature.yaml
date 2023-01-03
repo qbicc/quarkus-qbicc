@@ -53,37 +53,39 @@ reflectiveFields:
 reflectiveMethods:
   - declaringClass: io.netty.channel.DefaultChannelPipeline$HeadContext
     name: channelRegistered
-    descriptor: "(Lio/netty/channel/ChannelHandlerContext;)V"
+    arguments:
+      - io.netty.channel.ChannelHandlerContext
   - declaringClass: io.netty.channel.DefaultChannelPipeline$TailContext
     name: channelRegistered
-    descriptor: "(Lio/netty/channel/ChannelHandlerContext;)V"
+    arguments:
+      - io.netty.channel.ChannelHandlerContext
   - declaringClass: io.quarkus.runtime.logging.InheritableLevel
     name: of
-    descriptor: (Ljava/lang/String;)Lio/quarkus/runtime/logging/InheritableLevel;
+    arguments:
+      - java.lang.String
   - declaringClass: java.lang.management.ManagementFactory
     name: getRuntimeMXBean
-    descriptor: "()Ljava/lang/management/RuntimeMXBean;"
   - declaringClass: java.lang.management.RuntimeMXBean
     name: getInputArguments
-    descriptor: "()Ljava/util/List;"
   - declaringClass: java.lang.ProcessHandle
     name: current
-    descriptor: "()Ljava/lang/ProcessHandle;"
   - declaringClass: java.lang.ProcessHandle
     name: pid
-    descriptor: "()J"
   - declaringClass: java.net.ssl.SSLEngine
     name: getApplicationProtocol
-    descriptor: "()Ljava/lang/String;"
   - declaringClass: sun.misc.VM
     name: maxDirectMemory
-    descriptor: "()J"
   - declaringClass: sun.misc.Unsafe
     name: copyMemory
-    descriptor: "(Ljava/lang/Object;JLjava/lang/Object;JJ)V"
+    arguments:
+      - java.lang.Object
+      - long
+      - java.lang.Object
+      - long
+      - long
   - declaringClass: sun.misc.Unsafe
     name: storeFence
-    descriptor: "()V"
   - declaringClass: sun.misc.Unsafe
     name: invokeCleaner
-    descriptor: "(Ljava/nio/ByteBuffer;)V"
+    arguments:
+      - java.nio.ByteBuffer
