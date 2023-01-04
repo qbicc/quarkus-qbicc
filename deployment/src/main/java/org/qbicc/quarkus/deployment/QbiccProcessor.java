@@ -2,6 +2,7 @@ package org.qbicc.quarkus.deployment;
 
 import java.io.IOException;
 import java.net.URL;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -250,7 +251,18 @@ class QbiccProcessor {
                 // just give up
             }
         }));
-        addAppPath(mainBuilder, nativeImageJar.getPath(), new HashSet<>());
+        HashSet<Path> visited = new HashSet<>();
+        addAppPath(mainBuilder, nativeImageJar.getPath(), visited);
+
+        // TODO: Unclear why Quarkus isn't including asm as a dependency automatically.
+        try {
+            Path ow2Jar = Path.of(org.objectweb.asm.Type.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+            addAppPath(mainBuilder, ow2Jar, visited);
+        } catch (URISyntaxException e) {
+            // Should be impossible...
+            throw new RuntimeException("Native image build failed due to inability to locate org.ow2:asm.jar");
+        }
+
         final Main main = mainBuilder.build();
         DiagnosticContext context = main.call();
         int errors = context.errors();
