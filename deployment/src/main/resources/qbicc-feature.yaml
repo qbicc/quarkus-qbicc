@@ -44,21 +44,19 @@ runtimeResources:
 runtimeResource:
   - quarkus-build-time-runtime.properties
   - quarkus-runtime-config-defaults.properties
+reflectiveClasses:
+  - name: io.netty.channel.DefaultChannelPipeline$HeadContext
+    methods: true
+  - name: io.netty.channel.DefaultChannelPipeline$TailContext
+    methods: true
 reflectiveConstructors:
   - declaringClass: java.io.File
-    descriptor: (Ljava/lang/String;)V
+    arguments:
+      - java.lang.String
 reflectiveFields:
   - declaringClass: java.nio.Buffer
     name: address
 reflectiveMethods:
-  - declaringClass: io.netty.channel.DefaultChannelPipeline$HeadContext
-    name: channelRegistered
-    arguments:
-      - io.netty.channel.ChannelHandlerContext
-  - declaringClass: io.netty.channel.DefaultChannelPipeline$TailContext
-    name: channelRegistered
-    arguments:
-      - io.netty.channel.ChannelHandlerContext
   - declaringClass: io.quarkus.runtime.logging.InheritableLevel
     name: of
     arguments:
