@@ -31,6 +31,7 @@ import io.quarkus.deployment.builditem.nativeimage.LambdaCapturingTypeBuildItem;
 import io.quarkus.deployment.builditem.nativeimage.NativeImageProxyDefinitionBuildItem;
 import io.quarkus.deployment.builditem.nativeimage.NativeImageResourceBuildItem;
 import io.quarkus.deployment.builditem.nativeimage.NativeImageResourceBundleBuildItem;
+import io.quarkus.deployment.builditem.nativeimage.NativeImageResourceDirectoryBuildItem;
 import io.quarkus.deployment.builditem.nativeimage.NativeImageResourcePatternsBuildItem;
 import io.quarkus.deployment.builditem.nativeimage.NativeImageSecurityProviderBuildItem;
 import io.quarkus.deployment.builditem.nativeimage.NativeImageSystemPropertyBuildItem;
@@ -103,6 +104,8 @@ class QbiccProcessor {
                          List<RuntimeInitializedPackageBuildItem> runtimeInitializedPackageBuildItems,
                          List<RuntimeReinitializedClassBuildItem> runtimeReinitializedClassBuildItems,
                          List<NativeImageProxyDefinitionBuildItem> proxies,
+                         List<NativeImageResourceBuildItem> resourceItems,
+                         List<NativeImageResourceDirectoryBuildItem> resourceDirs,
                          List<NativeImageResourcePatternsBuildItem> resourcePatterns,
                          List<NativeImageResourceBundleBuildItem> resourceBundles,
                          List<ReflectiveMethodBuildItem> reflectiveMethods,
@@ -138,14 +141,22 @@ class QbiccProcessor {
             System.out.printf("TODO: QbiccProcessor: ignored %d proxies\n", proxies.size());
         }
 
-        for (NativeImageResourcePatternsBuildItem rp : resourcePatterns) {
-            for (String includes : rp.getIncludePatterns()) {
-                qfRuntimeResources.add(includes);
+        if (resourcePatterns.size() > 0) {
+            System.out.printf("TODO: QbiccProcessor: ignored %d resource patterns\n", resourcePatterns.size());
+        }
+
+        for (NativeImageResourceBuildItem ri : resourceItems) {
+            for (String r : ri.getResources()) {
+                qfRuntimeResources.add(r);
             }
         }
 
         if (resourceBundles.size() > 0) {
             System.out.printf("TODO: QbiccProcessor: ignored %d resource bundles\n", resourceBundles.size());
+        }
+
+        if (resourceDirs.size() > 0) {
+            System.out.printf("TODO: QbiccProcessor: ignored %d resource direcrtories\n", resourceDirs.size());
         }
 
         if (reflectiveMethods.size() > 0) {

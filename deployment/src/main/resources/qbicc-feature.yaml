@@ -2,9 +2,12 @@
 # As things get more mature, we should aim to make this less adhoc!
 ---
 initializeAtRuntime:
+  # Quarkus
   - io.quarkus.dev.console.QuarkusConsole
+  # Netty
   - io.netty.resolver.dns.DnsNameResolver
   - io.netty.resolver.dns.DefaultDnsServerAddressStreamProvider
+  - io.netty.resolver.dns.DnsServerAddressStreamProviders$DefaultProviderHolder
   - io.netty.util.NetUtil
   # JBoss
   - org.jboss.logmanager.StandardOutputStreams
@@ -12,28 +15,21 @@ initializeAtRuntime:
   - org.jboss.logmanager.handlers.SyslogHandler
   - org.wildfly.common.net.HostName
   - org.wildfly.common.os.Process
+  # Core JDK
   - java.net.AbstractPlainDatagramSocketImpl
   - sun.nio.ch.DatagramChannelImpl$DefaultOptionsHolder
   - sun.nio.ch.NativeSocketAddress
   - sun.nio.ch.ServerSocketChannelImpl$DefaultOptionsHolder
   - sun.nio.ch.SocketChannelImpl$DefaultOptionsHolder
-  # Hack for Quarkus 2.12: https://github.com/netty/netty/issues/11638
-  - io.netty.handler.ssl.BouncyCastleAlpnSslUtils
 runtimeResources:
   - application.properties
-  - META-INF/microprofile-config.properties
   - application-prod.properties
-runtimeResource:
-  - quarkus-build-time-runtime.properties
-  - quarkus-runtime-config-defaults.properties
+  - META-INF/microprofile-config.properties
 reflectiveClasses:
+  # Netty
   - name: io.netty.channel.DefaultChannelPipeline$HeadContext
     methods: true
   - name: io.netty.channel.DefaultChannelPipeline$TailContext
-    methods: true
-  - name: javax.net.ssl.SSLEngine
-    methods: true
-  - name: java.nio.channels.spi.SelectorProvider
     methods: true
   - name: io.netty.bootstrap.ServerBootstrap$1
     methods: true
@@ -42,6 +38,12 @@ reflectiveClasses:
   - name: io.netty.channel.ChannelInboundHandlerAdapter
     methods: true
   - name: io.netty.bootstrap.ServerBootstrap$ServerBootstrapAcceptor
+    methods: true
+  # Core JDK
+  - name: javax.net.ssl.SSLEngine
+    methods: true
+  - name: java.nio.channels.spi.SelectorProvider
+    methods: true
 reflectiveConstructors:
   - declaringClass: java.io.File
     arguments:
@@ -62,8 +64,6 @@ reflectiveMethods:
     name: current
   - declaringClass: java.lang.ProcessHandle
     name: pid
-  - declaringClass: java.net.ssl.SSLEngine
-    name: getApplicationProtocol
   - declaringClass: sun.misc.VM
     name: maxDirectMemory
   - declaringClass: sun.misc.Unsafe
