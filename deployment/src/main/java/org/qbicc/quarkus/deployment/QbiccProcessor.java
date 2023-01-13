@@ -101,7 +101,6 @@ class QbiccProcessor {
 
     @BuildStep
     QbiccFeatureBuildItem generateFeature(List<RuntimeInitializedClassBuildItem> runtimeInitializedClassBuildItems,
-                         List<RuntimeInitializedPackageBuildItem> runtimeInitializedPackageBuildItems,
                          List<RuntimeReinitializedClassBuildItem> runtimeReinitializedClassBuildItems,
                          List<NativeImageProxyDefinitionBuildItem> proxies,
                          List<NativeImageResourceBuildItem> resourceItems,
@@ -111,10 +110,7 @@ class QbiccProcessor {
                          List<ReflectiveMethodBuildItem> reflectiveMethods,
                          List<ReflectiveFieldBuildItem> reflectiveFields,
                          List<ReflectiveClassBuildItem> reflectiveClassBuildItems,
-                         List<ServiceProviderBuildItem> serviceProviderBuildItems,
-                         List<UnsafeAccessedFieldBuildItem> unsafeAccessedFields,
-                         List<JniRuntimeAccessBuildItem> jniRuntimeAccessibleClasses,
-                         List<LambdaCapturingTypeBuildItem> lambdaCapturingTypeBuildItems) {
+                         List<ServiceProviderBuildItem> serviceProviderBuildItems) {
 
         QbiccFeature qf = new QbiccFeature();
 
@@ -129,20 +125,21 @@ class QbiccProcessor {
             qfInitializeAtRuntime.add(i.getClassName());
         }
 
-        if (runtimeInitializedPackageBuildItems.size() > 0) {
-            System.out.printf("TODO: QbiccProcessor: ignored %d runtime initialized packages\n", runtimeReinitializedClassBuildItems.size());
-        }
-
-        if (runtimeReinitializedClassBuildItems.size() > 0) {
-            System.out.printf("TODO: QbiccProcessor: ignored %d runtime reinitialized classes\n", runtimeReinitializedClassBuildItems.size());
+        for (RuntimeReinitializedClassBuildItem rc : runtimeReinitializedClassBuildItems) {
+            System.out.printf("TODO: QbiccProcessor: ignored runtime reinitialized class %s\n", rc.getClassName());
         }
 
         if (proxies.size() > 0) {
             System.out.printf("TODO: QbiccProcessor: ignored %d proxies\n", proxies.size());
         }
 
-        if (resourcePatterns.size() > 0) {
-            System.out.printf("TODO: QbiccProcessor: ignored %d resource patterns\n", resourcePatterns.size());
+        for (NativeImageResourcePatternsBuildItem rp : resourcePatterns) {
+            for (String ip : rp.getIncludePatterns()) {
+                System.out.printf("TODO: QbiccProcessor: ignored resource include pattern: %s\n", ip);
+            }
+            for (String xp : rp.getExcludePatterns()) {
+                System.out.printf("TODO: QbiccProcessor: ignored resource exclude pattern: %s\n", xp);
+            }
         }
 
         for (NativeImageResourceBuildItem ri : resourceItems) {
@@ -151,12 +148,12 @@ class QbiccProcessor {
             }
         }
 
-        if (resourceBundles.size() > 0) {
-            System.out.printf("TODO: QbiccProcessor: ignored %d resource bundles\n", resourceBundles.size());
+        for (NativeImageResourceBundleBuildItem rb: resourceBundles) {
+            System.out.printf("TODO: QbiccProcessor: ignored resource bundle %s\n", rb.getBundleName());
         }
 
-        if (resourceDirs.size() > 0) {
-            System.out.printf("TODO: QbiccProcessor: ignored %d resource direcrtories\n", resourceDirs.size());
+        for (NativeImageResourceDirectoryBuildItem rd: resourceDirs) {
+            System.out.printf("TODO: QbiccProcessor: ignored resource directory %s\n", rd.getPath());
         }
 
         if (reflectiveMethods.size() > 0) {
@@ -186,20 +183,6 @@ class QbiccProcessor {
             for (String pc: sp.providers()) {
                 qfReflectiveClasses.add(new QbiccFeature.ReflectiveClass(pc, false, true, false));
             }
-        }
-
-        if (unsafeAccessedFields.size() > 0) {
-            System.out.printf("TODO: QbiccProcessor: ignored %d unsafe accessed fields\n", unsafeAccessedFields.size());
-        }
-
-        if (jniRuntimeAccessibleClasses.size() > 0) {
-            // Qbicc doesn't support JNI, so don't even consume this build item in the first place?
-            System.out.printf("TODO: QbiccProcessor: ignored %d jni runtime accessible classes\n", jniRuntimeAccessibleClasses.size());
-        }
-
-        if (lambdaCapturingTypeBuildItems.size() > 0) {
-            // TODO: Related to GraalVM serialization of initial heap, so not relevant for qbicc??  Don't consume this build item?
-            System.out.printf("TODO: QbiccProcessor: ignored %d lambda capturing types\n", lambdaCapturingTypeBuildItems.size());
         }
 
         // Finalize the fields that were produced by multiple items.
@@ -272,6 +255,13 @@ class QbiccProcessor {
         } catch (URISyntaxException e) {
             // Should be impossible...
             throw new RuntimeException("Native image build failed due to inability to locate org.ow2:asm.jar");
+        }
+
+        for (NativeImageSystemPropertyBuildItem sysProp: nativeImageProperties) {
+            mainBuilder.addPropertyDefine(sysProp.getKey(), sysProp.getValue());
+        }
+        if (nativeImageSecurityProviders.size() > 0) {
+            System.out.printf("TODO: QbiccProcessor: ignored %d native security providers\n", nativeImageSecurityProviders.size());
         }
 
         final Main main = mainBuilder.build();
