@@ -9,6 +9,7 @@ initializeAtRuntime:
   - io.netty.resolver.dns.DefaultDnsServerAddressStreamProvider
   - io.netty.resolver.dns.DnsServerAddressStreamProviders$DefaultProviderHolder
   - io.netty.util.NetUtil
+  - io.netty.handler.codec.compression.BrotliDecoder
   # JBoss
   - org.jboss.logmanager.StandardOutputStreams
   - org.jboss.logmanager.handlers.ConsoleHandler
