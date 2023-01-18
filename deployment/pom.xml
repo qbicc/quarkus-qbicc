@@ -201,6 +201,11 @@
             </exclusions>
         </dependency>
         <dependency>
+            <groupId>org.qbicc</groupId>
+            <artifactId>qbicc-plugin-initialization-control</artifactId>
+            <version>${qbicc.version}</version>
+        </dependency>
+        <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-junit5-internal</artifactId>
             <scope>test</scope>
