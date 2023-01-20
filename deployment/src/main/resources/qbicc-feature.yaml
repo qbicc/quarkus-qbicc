@@ -1,6 +1,10 @@
 # A qbicc feature that is meant to be applicable to any Quarkus application.
 # As things get more mature, we should aim to make this less adhoc!
 ---
+runtimeResources:
+  - application.properties
+  - application-prod.properties
+  - META-INF/microprofile-config.properties
 initializeAtRuntime:
   # Quarkus
   - io.quarkus.dev.console.QuarkusConsole
@@ -22,23 +26,37 @@ initializeAtRuntime:
   - sun.nio.ch.NativeSocketAddress
   - sun.nio.ch.ServerSocketChannelImpl$DefaultOptionsHolder
   - sun.nio.ch.SocketChannelImpl$DefaultOptionsHolder
-runtimeResources:
-  - application.properties
-  - application-prod.properties
-  - META-INF/microprofile-config.properties
 reflectiveClasses:
+  # TODO: see https://github.com/qbicc/quarkus-qbicc/issues/13
+  # We should not need to manually discover and list all of these netty and vertx classes here!
+  #
   # Netty
+  - name: io.netty.bootstrap.ServerBootstrap$1
+    methods: true
+  - name: io.netty.bootstrap.ServerBootstrap$ServerBootstrapAcceptor
+    methods: true
   - name: io.netty.channel.DefaultChannelPipeline$HeadContext
     methods: true
   - name: io.netty.channel.DefaultChannelPipeline$TailContext
     methods: true
-  - name: io.netty.bootstrap.ServerBootstrap$1
+  - name: io.netty.channel.ChannelDuplexHandler
+    methods: true
+  - name: io.netty.channel.ChannelHandler
     methods: true
   - name: io.netty.channel.ChannelInitializer
     methods: true
   - name: io.netty.channel.ChannelInboundHandlerAdapter
     methods: true
-  - name: io.netty.bootstrap.ServerBootstrap$ServerBootstrapAcceptor
+  - name: io.netty.handler.timeout.IdleStateHandler
+    methods: true
+  - name: io.netty.channel.ChannelOutboundHandler
+    methods: true
+  # Vertx
+  - name: io.vertx.core.http.impl.Http1xOrH2CHandler
+    methods: true
+  - name: io.vertx.core.http.impl.HttpServerWorker$1
+    methods: true
+  - name: io.vertx.core.net.impl.ServerChannelLoadBalancer
     methods: true
   # Core JDK
   - name: javax.net.ssl.SSLEngine
@@ -53,10 +71,12 @@ reflectiveFields:
   - declaringClass: java.nio.Buffer
     name: address
 reflectiveMethods:
+  # Quarkus
   - declaringClass: io.quarkus.runtime.logging.InheritableLevel
     name: of
     arguments:
       - java.lang.String
+  # Core JDK
   - declaringClass: java.lang.management.ManagementFactory
     name: getRuntimeMXBean
   - declaringClass: java.lang.management.RuntimeMXBean
