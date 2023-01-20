@@ -41,11 +41,29 @@ reflectiveClasses:
     methods: true
   - name: io.netty.channel.ChannelDuplexHandler
     methods: true
+  - name: io.netty.channel.ChannelHandlerAdapter
+    methods: true
   - name: io.netty.channel.ChannelHandler
     methods: true
   - name: io.netty.channel.ChannelInitializer
     methods: true
   - name: io.netty.channel.ChannelInboundHandlerAdapter
+    methods: true
+  - name: io.netty.channel.ChannelOutboundHandlerAdapter
+    methods: true
+  - name: io.netty.handler.codec.ByteToMessageDecoder
+    methods: true
+  - name: io.netty.handler.codec.MessageToMessageEncoder
+    methods: true
+  - name: io.netty.handler.codec.http.HttpObjectDecoder
+    methods: true
+  - name: io.netty.handler.codec.http.HttpObjectEncoder
+    methods: true
+  - name: io.netty.handler.codec.http.HttpRequestDecoder
+    methods: true
+  - name: io.netty.handler.codec.http.HttpResponseEncoder
+    methods: true
+  - name: io.netty.handler.codec.http.websocketx.extensions.WebSocketServerExtensionHandler
     methods: true
   - name: io.netty.handler.timeout.IdleStateHandler
     methods: true
@@ -54,7 +72,15 @@ reflectiveClasses:
   # Vertx
   - name: io.vertx.core.http.impl.Http1xOrH2CHandler
     methods: true
+  - name: io.vertx.core.http.impl.Http1xUpgradeToH2CHandler
+    methods: true
   - name: io.vertx.core.http.impl.HttpServerWorker$1
+    methods: true
+  - name: io.vertx.core.net.impl.VertxHandler
+    methods: true
+  - name: io.vertx.core.http.impl.VertxHttpRequestDecoder
+    methods: true
+  - name: io.vertx.core.http.impl.VertxHttpResponseEncoder
     methods: true
   - name: io.vertx.core.net.impl.ServerChannelLoadBalancer
     methods: true
