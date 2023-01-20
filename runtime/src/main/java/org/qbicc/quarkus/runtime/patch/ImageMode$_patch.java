@@ -2,10 +2,10 @@ package org.qbicc.quarkus.runtime.patch;
 
 import io.quarkus.runtime.ImageMode;
 import org.qbicc.runtime.Build;
-import org.qbicc.runtime.patcher.Patch;
+import org.qbicc.runtime.patcher.PatchClass;
 import org.qbicc.runtime.patcher.Replace;
 
-@Patch(ImageMode.class)
+@PatchClass(ImageMode.class)
 final class ImageMode$_patch {
     @Replace
     static ImageMode current() {
