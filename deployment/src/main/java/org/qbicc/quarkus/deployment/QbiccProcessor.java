@@ -278,8 +278,7 @@ class QbiccProcessor {
             System.out.printf("Compilation completed with %d warning(s)%n", Integer.valueOf(warnings));
         }
 
-        final DiagnosticContext dc = main.call();
-        if (dc.errors() > 0) {
+        if (context.errors() > 0) {
             throw new RuntimeException("Native image build failed due to errors");
         }
         return new QbiccResultBuildItem(outputDirectory.resolve(nativeImageName), "<todo>");
