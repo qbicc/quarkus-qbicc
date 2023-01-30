@@ -1,5 +1,8 @@
-# A qbicc feature that is meant to be applicable to any Quarkus application.
-# As things get more mature, we should aim to make this less adhoc!
+# A default qbicc feature that is applicable to any Quarkus application.
+#
+# TODO: The long list of netty and vertx reflectiveClasses suggest that
+#       there is either some aspect of how GraalVM nativeimage deals with
+#       reflection or some Quarkus-GraalVM configuration path we are missing.
 ---
 runtimeResources:
   - application.properties
@@ -84,11 +87,6 @@ reflectiveClasses:
     methods: true
   - name: io.vertx.core.net.impl.ServerChannelLoadBalancer
     methods: true
-  # Core JDK
-  - name: javax.net.ssl.SSLEngine
-    methods: true
-  - name: java.nio.channels.spi.SelectorProvider
-    methods: true
 reflectiveConstructors:
   - declaringClass: java.io.File
     arguments:
@@ -113,17 +111,3 @@ reflectiveMethods:
     name: pid
   - declaringClass: sun.misc.VM
     name: maxDirectMemory
-  - declaringClass: sun.misc.Unsafe
-    name: copyMemory
-    arguments:
-      - java.lang.Object
-      - long
-      - java.lang.Object
-      - long
-      - long
-  - declaringClass: sun.misc.Unsafe
-    name: storeFence
-  - declaringClass: sun.misc.Unsafe
-    name: invokeCleaner
-    arguments:
-      - java.nio.ByteBuffer
