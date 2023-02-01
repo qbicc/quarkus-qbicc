@@ -87,6 +87,36 @@ reflectiveClasses:
     methods: true
   - name: io.vertx.core.net.impl.ServerChannelLoadBalancer
     methods: true
+  # Core OpenJDK Classes
+  - name: java.lang.Boolean
+    methods: true
+    fields: true
+  - name: java.lang.Byte
+    methods: true
+    fields: true
+  - name: java.lang.Character
+    methods: true
+    fields: true
+  - name: java.lang.Comparable
+    methods: true
+  - name: java.lang.Double
+    methods: true
+    fields: true
+  - name: java.lang.Float
+    methods: true
+    fields: true
+  - name: java.lang.Integer
+    methods: true
+    fields: true
+  - name: java.lang.Long
+    methods: true
+    fields: true
+  - name: java.lang.Number
+    methods: true
+    fields: true
+  - name: java.lang.Short
+    methods: true
+    fields: true
 reflectiveConstructors:
   - declaringClass: java.io.File
     arguments:
