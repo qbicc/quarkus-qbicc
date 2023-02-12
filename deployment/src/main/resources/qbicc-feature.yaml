@@ -8,6 +8,10 @@ runtimeResources:
   - application.properties
   - application-prod.properties
   - META-INF/microprofile-config.properties
+  # TODO: Had to explicitly register this for "quarkus-quickstart/getting-started".
+  #    Is there some assumption in Quarkus that everything in META-INF/resources is automatically
+  #    made available at runtime when building a native image???
+  - META-INF/resources/index.html
 initializeAtRuntime:
   # Quarkus
   - io.quarkus.dev.console.QuarkusConsole
@@ -88,35 +92,49 @@ reflectiveClasses:
   - name: io.vertx.core.net.impl.ServerChannelLoadBalancer
     methods: true
   # Core OpenJDK Classes
+  - name: java.io.Serializable
+    methods: true
   - name: java.lang.Boolean
-    methods: true
+    constructors: true
     fields: true
+    methods: true
   - name: java.lang.Byte
-    methods: true
+    constructors: true
     fields: true
+    methods: true
   - name: java.lang.Character
-    methods: true
+    constructors: true
     fields: true
+    methods: true
   - name: java.lang.Comparable
     methods: true
   - name: java.lang.Double
-    methods: true
+    constructors: true
     fields: true
+    methods: true
   - name: java.lang.Float
-    methods: true
+    constructors: true
     fields: true
+    methods: true
   - name: java.lang.Integer
-    methods: true
+    constructors: true
     fields: true
+    methods: true
   - name: java.lang.Long
-    methods: true
+    constructors: true
     fields: true
+    methods: true
   - name: java.lang.Number
-    methods: true
     fields: true
+    methods: true
   - name: java.lang.Short
-    methods: true
+    constructors: true
     fields: true
+    methods: true
+  - name: java.lang.constant.ConstantDesc
+    methods: true
+  - name: java.lang.constant.Constable
+    methods: true
 reflectiveConstructors:
   - declaringClass: java.io.File
     arguments:
