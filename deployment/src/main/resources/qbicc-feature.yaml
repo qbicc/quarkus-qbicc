@@ -1,10 +1,17 @@
-# A qbicc feature that is meant to be applicable to any Quarkus application.
-# As things get more mature, we should aim to make this less adhoc!
+# A default qbicc feature that is applicable to any Quarkus application.
+#
+# TODO: The long list of netty and vertx reflectiveClasses suggest that
+#       there is either some aspect of how GraalVM nativeimage deals with
+#       reflection or some Quarkus-GraalVM configuration path we are missing.
 ---
 runtimeResources:
   - application.properties
   - application-prod.properties
   - META-INF/microprofile-config.properties
+  # TODO: Had to explicitly register this for "quarkus-quickstart/getting-started".
+  #    Is there some assumption in Quarkus that everything in META-INF/resources is automatically
+  #    made available at runtime when building a native image???
+  - META-INF/resources/index.html
 initializeAtRuntime:
   # Quarkus
   - io.quarkus.dev.console.QuarkusConsole
@@ -84,10 +91,49 @@ reflectiveClasses:
     methods: true
   - name: io.vertx.core.net.impl.ServerChannelLoadBalancer
     methods: true
-  # Core JDK
-  - name: javax.net.ssl.SSLEngine
+  # Core OpenJDK Classes
+  - name: java.io.Serializable
     methods: true
-  - name: java.nio.channels.spi.SelectorProvider
+  - name: java.lang.Boolean
+    constructors: true
+    fields: true
+    methods: true
+  - name: java.lang.Byte
+    constructors: true
+    fields: true
+    methods: true
+  - name: java.lang.Character
+    constructors: true
+    fields: true
+    methods: true
+  - name: java.lang.Comparable
+    methods: true
+  - name: java.lang.Double
+    constructors: true
+    fields: true
+    methods: true
+  - name: java.lang.Float
+    constructors: true
+    fields: true
+    methods: true
+  - name: java.lang.Integer
+    constructors: true
+    fields: true
+    methods: true
+  - name: java.lang.Long
+    constructors: true
+    fields: true
+    methods: true
+  - name: java.lang.Number
+    fields: true
+    methods: true
+  - name: java.lang.Short
+    constructors: true
+    fields: true
+    methods: true
+  - name: java.lang.constant.ConstantDesc
+    methods: true
+  - name: java.lang.constant.Constable
     methods: true
 reflectiveConstructors:
   - declaringClass: java.io.File
@@ -113,17 +159,3 @@ reflectiveMethods:
     name: pid
   - declaringClass: sun.misc.VM
     name: maxDirectMemory
-  - declaringClass: sun.misc.Unsafe
-    name: copyMemory
-    arguments:
-      - java.lang.Object
-      - long
-      - java.lang.Object
-      - long
-      - long
-  - declaringClass: sun.misc.Unsafe
-    name: storeFence
-  - declaringClass: sun.misc.Unsafe
-    name: invokeCleaner
-    arguments:
-      - java.nio.ByteBuffer

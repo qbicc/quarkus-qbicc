@@ -114,7 +114,7 @@ class QbiccProcessor {
 
         QbiccFeature qf = new QbiccFeature();
 
-        // These fields of the qbicc feature are computed from from multiple input BuildItems
+        // These fields of the qbicc feature are computed from multiple input BuildItems
         ArrayList<String> qfInitializeAtRuntime = new ArrayList<>();
         ArrayList<QbiccFeature.ReflectiveClass> qfReflectiveClasses = new ArrayList<>();
         ArrayList<String> qfRuntimeResources = new ArrayList<>();
