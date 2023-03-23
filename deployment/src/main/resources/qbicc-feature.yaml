@@ -1,8 +1,12 @@
 # A default qbicc feature that is applicable to any Quarkus application.
 #
-# TODO: The long list of netty and vertx reflectiveClasses suggest that
-#       there is either some aspect of how GraalVM nativeimage deals with
-#       reflection or some Quarkus-GraalVM configuration path we are missing.
+# TODO: https://github.com/qbicc/quarkus-qbicc/issues/13
+#   The long list of netty and vertx reflectiveClasses is
+#   caused because the extension code that should have done these
+#   operations is guarded by @BuildStep(onlyIf = NativeOrNativeSourcesBuild.class).
+#   All of these can be removed from here once we figure out how to enable
+#   NativeBuild for quarkus-qbicc without also enabling graalvm nativeimage.
+#
 ---
 runtimeResources:
   - application.properties
@@ -21,6 +25,15 @@ initializeAtRuntime:
   - io.netty.resolver.dns.DnsServerAddressStreamProviders$DefaultProviderHolder
   - io.netty.util.NetUtil
   - io.netty.handler.codec.compression.BrotliDecoder
+  - io.netty.channel.DefaultChannelId
+  - io.netty.handler.ssl.JdkNpnApplicationProtocolNegotiator
+  - io.netty.handler.ssl.ConscryptAlpnSslEngine
+  - io.netty.handler.ssl.ReferenceCountedOpenSslEngine
+  - io.netty.handler.ssl.ReferenceCountedOpenSslContext
+  - io.netty.handler.ssl.ReferenceCountedOpenSslClientContext
+  - io.netty.handler.ssl.util.ThreadLocalInsecureRandom
+  - io.netty.handler.codec.compression.ZstdOptions
+  - io.netty.handler.codec.compression.BrotliOptions
   # JBoss
   - org.jboss.logmanager.StandardOutputStreams
   - org.jboss.logmanager.handlers.ConsoleHandler
@@ -34,9 +47,6 @@ initializeAtRuntime:
   - sun.nio.ch.ServerSocketChannelImpl$DefaultOptionsHolder
   - sun.nio.ch.SocketChannelImpl$DefaultOptionsHolder
 reflectiveClasses:
-  # TODO: see https://github.com/qbicc/quarkus-qbicc/issues/13
-  # We should not need to manually discover and list all of these netty and vertx classes here!
-  #
   # Netty
   - name: io.netty.bootstrap.ServerBootstrap$1
     methods: true
@@ -76,6 +86,9 @@ reflectiveClasses:
     methods: true
   - name: io.netty.channel.ChannelOutboundHandler
     methods: true
+  - name: sun.nio.ch.SelectorImpl
+    methods: true
+    fields: true
   # Vertx
   - name: io.vertx.core.http.impl.Http1xOrH2CHandler
     methods: true
