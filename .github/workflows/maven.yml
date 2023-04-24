@@ -1,0 +1,83 @@
+name: quarkus-qbiccs Continuous Integration
+on:
+  push:
+    paths-ignore:
+      - '**.md'
+      - '**.adoc'
+    branches: [ main ]
+  pull_request:
+    paths-ignore:
+      - '**.md'
+      - '**.adoc'
+    branches: [ main ]
+    types: [ opened, synchronize, reopened ]
+jobs:
+  build-matrix:
+    name: "Matrix build"
+    strategy:
+      fail-fast: false
+      matrix:
+        llvm-version: ["15"]
+        os: [ubuntu-latest, macos-latest]
+
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Install LLVM
+        uses: KyleMayes/install-llvm-action@v1.6.1
+        with:
+          version: ${{ matrix.llvm-version }}
+          directory: ${{ runner.temp }}/llvm-install
+
+      - name: Install `libgcc` (Linux only)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get install -y libgcc-11-dev
+
+      - name: Install libunwind (Linux only)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get install -y libunwind-dev
+
+      - name: Install OpenJDK
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      # Temporary: avoid quarkus issues with maven >= 3.8.x
+      - name: Set up Maven
+        uses: stCarolas/setup-maven@v4.5
+        with:
+          maven-version: 3.8.7
+
+      - name: Clone project
+        uses: actions/checkout@v3
+        with:
+          path: quarkus-qbicc
+          submodules: recursive
+
+      - name: Build extension
+        run: |
+          mvn --batch-mode install
+        working-directory: quarkus-qbicc
+
+      - name: Clone knative-quarkus-bench
+        uses: actions/checkout@v3
+        with:
+          repository: ibm/knative-quarkus-bench
+          path: knative-quarkus-bench
+
+      - name: Compile sleep benchmark
+        env:
+          MAVEN_OPTS: -Xss8m -Xms1024M -Xmx4096M
+        run: |
+          mvn --batch-mode package -Dquarkus.container-image.build=false -Pqbicc
+        working-directory: knative-quarkus-bench/benchmarks/sleep
+
+      - name: Run sleep benchmark
+        # TODO: Disabled on macos because it isn't working in the CI environment (not sure why..)
+        if: matrix.os != 'macos-latest'
+        run: ./quarkus-qbicc/.github/workflows/testSleep.sh
+        env:
+          QUARKUS_HTTP_HOST: 127.0.0.1
+          QUARKUS_HTTP_PORT: 8081
