@@ -210,14 +210,14 @@ class QbiccProcessor {
         mainBuilder.setPlatform(platform);
         mainBuilder.setIsPie(pie);
         mainBuilder.setLlvmConfigurationBuilder(LLVMConfiguration.builder()
-            .setEmitIr(configuration.llvmConfiguration().emitIr())
+            .setEmitIr(configuration.llvm().emitIr())
             .setPie(pie)
             .setReferenceStrategy(ReferenceStrategy.POINTER_AS1)
             .setEmitAssembly(configuration.emitAsm())
             .setPlatform(platform)
             .setCompileOutput(true)
-            .setOpaquePointers(configuration.llvmConfiguration().opaquePointers())
-            .addLlcOptions(configuration.llvmConfiguration().llcOptions().orElse(List.of()))
+            .setOpaquePointers(configuration.llvm().opaquePointers())
+            .addLlcOptions(configuration.llvm().llcOptions().orElse(List.of()))
         );
         mainBuilder.setBackend(Backend.llvm);
         mainBuilder.setGc(configuration.gc().toString());
