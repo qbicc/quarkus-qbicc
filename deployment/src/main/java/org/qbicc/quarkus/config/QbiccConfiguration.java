@@ -20,7 +20,7 @@ public interface QbiccConfiguration {
      *
      * @return the configuration for the LLVM backend
      */
-    LlvmConfiguration llvmConfiguration();
+    LlvmConfiguration llvm();
 
     /**
      * The platform to compile for. If not given, the host platform will be used.
