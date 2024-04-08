@@ -56,6 +56,6 @@ public interface QbiccConfiguration {
      *
      * @return the GC to use
      */
-    @WithDefault("none")
+    @WithDefault("semi")
     Gc gc();
 }

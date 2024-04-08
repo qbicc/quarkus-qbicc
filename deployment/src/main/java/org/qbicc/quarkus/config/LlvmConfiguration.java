@@ -20,14 +20,6 @@ public interface LlvmConfiguration {
     boolean emitIr();
 
     /**
-     * Set to enable LLVM opaque pointers (the default in LLVM 16 and later).
-     *
-     * @return {@code true} if opaque pointers are enabled
-     */
-    @WithDefault("false")
-    boolean opaquePointers();
-
-    /**
      * Optional extra options for {@code llc}.
      *
      * @return the extra options

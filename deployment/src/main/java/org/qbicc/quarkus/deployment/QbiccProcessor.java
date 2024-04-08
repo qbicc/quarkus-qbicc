@@ -40,6 +40,7 @@ import org.apache.commons.lang3.SystemUtils;
 import org.eclipse.aether.RepositorySystem;
 import org.eclipse.aether.RepositorySystemSession;
 import org.eclipse.aether.repository.RemoteRepository;
+import org.jboss.logging.Logger;
 import org.qbicc.context.DiagnosticContext;
 import org.qbicc.driver.ClassPathItem;
 import org.qbicc.machine.arch.Platform;
@@ -55,6 +56,7 @@ import org.qbicc.quarkus.spi.QbiccFeatureBuildItem;
 import org.qbicc.quarkus.spi.QbiccResultBuildItem;
 
 class QbiccProcessor {
+    private static final Logger log = Logger.getLogger("org.qbicc.quarkus.deployment");
 
     private static final String FEATURE = "qbicc";
 
@@ -115,37 +117,35 @@ class QbiccProcessor {
         }
 
         for (RuntimeReinitializedClassBuildItem rc : runtimeReinitializedClassBuildItems) {
-            System.out.printf("TODO: QbiccProcessor: ignored runtime reinitialized class %s\n", rc.getClassName());
+            log.warnf("TODO: QbiccProcessor: ignored runtime reinitialized class %s\n", rc.getClassName());
         }
 
-        if (proxies.size() > 0) {
-            System.out.printf("TODO: QbiccProcessor: ignored %d proxies\n", proxies.size());
+        if (! proxies.isEmpty()) {
+            log.warnf("TODO: QbiccProcessor: ignored %d proxies\n", proxies.size());
         }
 
         for (NativeImageResourcePatternsBuildItem rp : resourcePatterns) {
             for (String ip : rp.getIncludePatterns()) {
-                System.out.printf("TODO: QbiccProcessor: ignored resource include pattern: %s\n", ip);
+                log.warnf("TODO: QbiccProcessor: ignored resource include pattern: %s\n", ip);
             }
             for (String xp : rp.getExcludePatterns()) {
-                System.out.printf("TODO: QbiccProcessor: ignored resource exclude pattern: %s\n", xp);
+                log.warnf("TODO: QbiccProcessor: ignored resource exclude pattern: %s\n", xp);
             }
         }
 
         for (NativeImageResourceBuildItem ri : resourceItems) {
-            for (String r : ri.getResources()) {
-                qfRuntimeResources.add(r);
-            }
+            qfRuntimeResources.addAll(ri.getResources());
         }
 
         for (NativeImageResourceBundleBuildItem rb: resourceBundles) {
-            System.out.printf("TODO: QbiccProcessor: ignored resource bundle %s\n", rb.getBundleName());
+            log.warnf("TODO: QbiccProcessor: ignored resource bundle %s\n", rb.getBundleName());
         }
 
         for (NativeImageResourceDirectoryBuildItem rd: resourceDirs) {
-            System.out.printf("TODO: QbiccProcessor: ignored resource directory %s\n", rd.getPath());
+            log.warnf("TODO: QbiccProcessor: ignored resource directory %s\n", rd.getPath());
         }
 
-        if (reflectiveMethods.size() > 0) {
+        if (! reflectiveMethods.isEmpty()) {
             ArrayList<QbiccFeature.Method> refMethods = new ArrayList<>();
             for (ReflectiveMethodBuildItem rm: reflectiveMethods) {
                 refMethods.add(new QbiccFeature.Method(rm.getDeclaringClass(), rm.getName(), rm.getParams()));
@@ -153,7 +153,7 @@ class QbiccProcessor {
             qf.reflectiveMethods = refMethods.toArray(QbiccFeature.Method[]::new);
         }
 
-        if (reflectiveFields.size() > 0) {
+        if (! reflectiveFields.isEmpty()) {
             ArrayList<QbiccFeature.Field> refFields = new ArrayList<>();
             for (ReflectiveFieldBuildItem rf : reflectiveFields) {
                 refFields.add(new QbiccFeature.Field(rf.getDeclaringClass(), rf.getName()));
@@ -205,6 +205,9 @@ class QbiccProcessor {
         }
         final Platform platform = configuration.platform().orElse(Platform.HOST_PLATFORM);
         URL defaultFeature = QbiccProcessor.class.getResource("/qbicc-feature.yaml");
+        if (defaultFeature == null) {
+            throw new IllegalStateException("Missing internal resource");
+        }
         mainBuilder.addQbiccYamlFeatures(List.of(defaultFeature));
         mainBuilder.addQbiccFeature((QbiccFeature)dynamicQbiccFeature.getFeature());
         mainBuilder.setPlatform(platform);
@@ -216,7 +219,6 @@ class QbiccProcessor {
             .setEmitAssembly(configuration.emitAsm())
             .setPlatform(platform)
             .setCompileOutput(true)
-            .setOpaquePointers(configuration.llvm().opaquePointers())
             .addLlcOptions(configuration.llvm().llcOptions().orElse(List.of()))
         );
         mainBuilder.setBackend(Backend.llvm);
@@ -249,8 +251,8 @@ class QbiccProcessor {
         for (NativeImageSystemPropertyBuildItem sysProp: nativeImageProperties) {
             mainBuilder.addPropertyDefine(sysProp.getKey(), sysProp.getValue());
         }
-        if (nativeImageSecurityProviders.size() > 0) {
-            System.out.printf("TODO: QbiccProcessor: ignored %d native security providers\n", nativeImageSecurityProviders.size());
+        if (! nativeImageSecurityProviders.isEmpty()) {
+            log.warnf("TODO: QbiccProcessor: ignored %d native security providers\n", nativeImageSecurityProviders.size());
         }
 
         final Main main = mainBuilder.build();
@@ -259,12 +261,12 @@ class QbiccProcessor {
         int warnings = context.warnings();
         if (errors > 0) {
             if (warnings > 0) {
-                System.out.printf("Compilation failed with %d error(s) and %d warning(s)%n", Integer.valueOf(errors), Integer.valueOf(warnings));
+                log.errorf("Compilation failed with %d error(s) and %d warning(s)%n", Integer.valueOf(errors), Integer.valueOf(warnings));
             } else {
-                System.out.printf("Compilation failed with %d error(s)%n", Integer.valueOf(errors));
+                log.errorf("Compilation failed with %d error(s)%n", Integer.valueOf(errors));
             }
         } else if (warnings > 0) {
-            System.out.printf("Compilation completed with %d warning(s)%n", Integer.valueOf(warnings));
+            log.warnf("Compilation completed with %d warning(s)%n", Integer.valueOf(warnings));
         }
 
         if (context.errors() > 0) {
