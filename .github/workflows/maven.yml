@@ -44,12 +44,6 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      # Temporary: avoid quarkus issues with maven >= 3.8.x
-      - name: Set up Maven
-        uses: stCarolas/setup-maven@v4.5
-        with:
-          maven-version: 3.8.7
-
       - name: Clone project
         uses: actions/checkout@v3
         with:
